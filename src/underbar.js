@@ -198,25 +198,19 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    
-    if (iterator){
+  iterator = iterator || _.identity;
+  return _.reduce(collection, function(test, item){return !!(iterator(item)&&test)}, true)};
 
-    return _.reduce(collection, function(test, item){
-        if (iterator(item) != test){
-          return false;
-        }
-        else{
-        return iterator(item) == test;}
-      }, true);
-  }
- 
-  };
+  
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
-    // TIP: There's a very clever way to re-use every() here.
-  };
+  
+  iterator = iterator || _.identity;
+
+  return _.reduce(collection, function(test, item){return !!(iterator(item)||test)}, false)};
+    // TIP: There's a very clever way to re-use every() here
 
 
   /**
@@ -238,11 +232,30 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+  
+      _.each(arguments, function(from){
+      if (from.hasOwnProperty){
+      for (var i in from){
+          obj[i] = from[i];
+      }
+    }});
+      return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+
+    _.each(arguments, function(from){
+     if (from.hasOwnProperty){
+      for (var i in from){
+        if (obj[i]=== undefined){
+          obj[i] = from[i]
+        }
+        ;}
+      }
+    });
+      return obj;
   };
 
 
@@ -286,6 +299,18 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+  
+
+    var memo = {};
+
+
+    return function() {
+      var newArg = arguments[0];
+      if (memo[newArg] == undefined) {
+        memo[newArg] = func.apply(this, arguments);
+      }
+      return memo[newArg];
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -295,6 +320,8 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args=Array.prototype.slice.call(arguments, 2);
+    return setTimeout(function(){return func.apply(this, args)}, wait);
   };
 
 
@@ -309,6 +336,23 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+  
+    var newArr = array.slice();
+    var shufArr = [];
+      for (var i = 0; i<newArr.length; i++){
+        shufArr.push("");
+      };
+    var i = 0;
+    while (i < newArr.length){
+      var newIndex = Math.floor(Math.random()*newArr.length);
+      if (!_.contains(shufArr, newArr[newIndex])){
+
+          shufArr[i] = newArr[newIndex];
+        i++;
+      }
+    }
+    return shufArr;
+
   };
 
 
@@ -323,6 +367,12 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    
+    var parsedFunc = Function.prototype.functionOrKey.apply(this, args);
+
+
+    return  parsedFunct(collection);
+
   };
 
   // Sort the object's values by a criterion produced by an iterator.
